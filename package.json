@@ -9,7 +9,9 @@
     "setup:server": "cd server && yarn",
     "setup": "yarn install && yarn setup:client && yarn setup:server",
     "dev": "yarn concurrently \"cd server && yarn develop\" \"cd client && yarn dev\"",
-    "repo:upstream": "git fetch upstream && git merge upstream/main"
+    "repo:upstream": "git fetch upstream && git merge upstream/main",
+    "seed": "cd server && yarn strapi import -f ../seed-data.tar.gz",
+    "export": "cd server && yarn strapi export --no-encrypt -f  ../seed-data"
   },
   "dependencies": {
     "concurrently": "^7.6.0"

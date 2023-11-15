@@ -1,26 +1,23 @@
 import { json } from "@remix-run/node";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import type { FunctionComponent } from "react";
-import type { ContactRecord } from "../data";
+import type { ContactData } from "~/data.server";
 
 import invariant from "tiny-invariant";
 import { Form, useLoaderData, useFetcher } from "@remix-run/react";
-import { getContact, updateContact } from "../data";
+import { getContactById, updateContactById } from "~/data.server";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   invariant(params.contactId, "Missing contactId param");
-  const contact = await getContact(params.contactId);
+  const contact = await getContactById(params.contactId);
   if (!contact) throw new Response("Not Found", { status: 404 });
   return json({ contact });
 };
 
-export const action = async ({
-  params,
-  request,
-}: ActionFunctionArgs) => {
+export const action = async ({ params, request }: ActionFunctionArgs) => {
   invariant(params.contactId, "Missing contactId param");
   const formData = await request.formData();
-  return updateContact(params.contactId, {
+  return updateContactById(params.contactId, {
     favorite: formData.get("favorite") === "true",
   });
 };
@@ -36,7 +33,7 @@ export default function Contact() {
         <img
           alt={`${contact.first} ${contact.last} avatar`}
           key={contact.avatar}
-          src={contact.avatar}
+          src={contact.avatar || "https://picsum.photos/200"}
         />
       </div>
 
@@ -88,14 +85,13 @@ export default function Contact() {
 }
 
 const Favorite: FunctionComponent<{
-  contact: Pick<ContactRecord, "favorite">;
+  contact: Pick<ContactData, "favorite">;
 }> = ({ contact }) => {
   const fetcher = useFetcher();
 
   const favorite = fetcher.formData
-  ? fetcher.formData.get("favorite") === "true"
-  : contact.favorite;
-
+    ? fetcher.formData.get("favorite") === "true"
+    : contact.favorite;
 
   return (
     <fetcher.Form method="post">
@@ -106,6 +102,6 @@ const Favorite: FunctionComponent<{
       >
         {favorite ? "★" : "☆"}
       </button>
-    </fetcher.Form >
+    </fetcher.Form>
   );
 };

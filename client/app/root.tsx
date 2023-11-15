@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { json, redirect } from "@remix-run/node";
+import { json } from "@remix-run/node";
 
 import {
   Form,
@@ -15,7 +15,7 @@ import {
   useSubmit,
 } from "@remix-run/react";
 
-import { createEmptyContact, getContacts } from "./data";
+import { getAllContacts } from "~/data.server";
 
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import appStylesHref from "./app.css";
@@ -27,13 +27,8 @@ export const links: LinksFunction = () => [
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
-  const contacts = await getContacts(q);
+  const contacts = await getAllContacts(q as string);
   return json({ contacts, q });
-};
-
-export const action = async () => {
-  const contact = await createEmptyContact();
-  return redirect(`/contacts/${contact.id}/edit`);
 };
 
 export default function App() {
@@ -84,14 +79,12 @@ export default function App() {
               />
               <div id="search-spinner" aria-hidden hidden={!searching} />
             </Form>
-            <Form method="post">
-              <button type="submit">New</button>
-            </Form>
+            <NavLink to="/contacts/create"><button>New</button></NavLink>
           </div>
           <nav>
             {contacts.length ? (
               <ul>
-                {contacts.map((contact) => (
+                {contacts.map((contact: any) => (
                   <li key={contact.id}>
                     <NavLink
                       className={({ isActive, isPending }) =>
@@ -105,7 +98,7 @@ export default function App() {
                         </>
                       ) : (
                         <i>No Name</i>
-                      )}{" "}
+                      )}
                       {contact.favorite ? <span>★</span> : null}
                     </NavLink>
                   </li>

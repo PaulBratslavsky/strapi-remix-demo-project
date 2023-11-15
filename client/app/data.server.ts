@@ -1,13 +1,8 @@
-////////////////////////////////////////////////////////////////////////////////
-// 🛑 Nothing in here has anything to do with Remix, it's just a fake database
-////////////////////////////////////////////////////////////////////////////////
+import qs from "qs";
+import { flattenAttributes } from "~/utils/api-helpers";
+const url = process.env.STRAPI_URL || "http://localhost:1337";
 
-import { matchSorter } from "match-sorter";
-// @ts-ignore - no types, but it's a tiny function
-import sortBy from "sort-by";
-import invariant from "tiny-invariant";
-
-type ContactMutation = {
+export type ContactData = {
   id?: string;
   first?: string;
   last?: string;
@@ -17,85 +12,87 @@ type ContactMutation = {
   favorite?: boolean;
 };
 
-export type ContactRecord = ContactMutation & {
-  id: string;
-  createdAt: string;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// This is just a fake DB table. In a real app you'd be talking to a real db or
-// fetching from an existing API.
-const fakeContacts = {
-  records: {} as Record<string, ContactRecord>,
-
-  async getAll(): Promise<ContactRecord[]> {
-    return Object.keys(fakeContacts.records)
-      .map((key) => fakeContacts.records[key])
-      .sort(sortBy("-createdAt", "last"));
-  },
-
-  async get(id: string): Promise<ContactRecord | null> {
-    return fakeContacts.records[id] || null;
-  },
-
-  async create(values: ContactMutation): Promise<ContactRecord> {
-    const id = values.id || Math.random().toString(36).substring(2, 9);
-    const createdAt = new Date().toISOString();
-    const newContact = { id, createdAt, ...values };
-    fakeContacts.records[id] = newContact;
-    return newContact;
-  },
-
-  async set(id: string, values: ContactMutation): Promise<ContactRecord> {
-    const contact = await fakeContacts.get(id);
-    invariant(contact, `No contact found for ${id}`);
-    const updatedContact = { ...contact, ...values };
-    fakeContacts.records[id] = updatedContact;
-    return updatedContact;
-  },
-
-  destroy(id: string): null {
-    delete fakeContacts.records[id];
-    return null;
-  },
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// Handful of helper functions to be called from route loaders and actions
-export async function getContacts(query?: string | null) {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  let contacts = await fakeContacts.getAll();
-  if (query) {
-    contacts = matchSorter(contacts, query, {
-      keys: ["first", "last"],
+export async function getAllContacts(q: string) {
+  const query = (q: string) =>
+    qs.stringify({
+      filters: {
+        $or: [
+          { first: { $contains: q } },
+          { last: { $contains: q } },
+          { twitter: { $contains: q } },
+        ],
+      },
     });
+
+  try {
+    const res = await fetch(`${url}/api/contacts?${query(q)}`);
+    const data = await res.json();
+    const flattenedData = flattenAttributes(data.data);
+    return flattenedData;
+  } catch (error) {
+    console.log(error);
   }
-  return contacts.sort(sortBy("last", "createdAt"));
 }
 
-export async function createEmptyContact() {
-  const contact = await fakeContacts.create({});
-  return contact;
-}
+export async function getContactById(id: string) {
 
-export async function getContact(id: string) {
-  return fakeContacts.get(id);
-}
-
-export async function updateContact(id: string, updates: ContactMutation) {
-  const contact = await fakeContacts.get(id);
-  if (!contact) {
-    throw new Error(`No contact found for ${id}`);
+  try {
+    const res = await fetch(`${url}/api/contacts/${id}`);
+    const data = await res.json();
+    const flattenedData = flattenAttributes(data);
+    return flattenedData;
+  } catch (error) {
+    console.log(error);
   }
-  await fakeContacts.set(id, { ...contact, ...updates });
-  return contact;
 }
 
-export async function deleteContact(id: string) {
-  fakeContacts.destroy(id);
+export async function createNewContact(data: any) {
+  try {
+    const res = await fetch(`${url}/api/contacts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: {...data}}),
+    });
+    const createdData = await res.json();
+    const flattenedData = flattenAttributes(createdData);
+    return flattenedData;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-[
+export async function updateContactById(id: string, data: any) {
+  try {
+    const res = await fetch(`http://localhost:1337/api/contacts/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({data: {...data}}),
+    });
+    const updatedData = await res.json();
+    const flattenedData = flattenAttributes(updatedData);
+    return flattenedData;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function deleteContactById(id: string) {
+  try {
+    const res = await fetch(`http://localhost:1337/api/contacts/${id}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const data = [
   {
     avatar:
       "https://sessionize.com/image/124e-400o400o2-wHVdAuNaxi8KJrgtN3ZKci.jpg",
@@ -308,9 +305,4 @@ export async function deleteContact(id: string) {
     last: "Jensen",
     twitter: "@jenseng",
   },
-].forEach((contact) => {
-  fakeContacts.create({
-    ...contact,
-    id: `${contact.first.toLowerCase()}-${contact.last.toLocaleLowerCase()}`,
-  });
-});
+];
