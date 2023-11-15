@@ -1,0 +1,19 @@
+{
+  "name": "strapi-remix-demo-project",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "client": "yarn dev --prefix ../client/",
+    "server": "yarn dev --prefix ../server/",
+    "setup:client": "cd client && yarn",
+    "setup:server": "cd server && yarn",
+    "setup": "yarn install && yarn setup:client && yarn setup:server",
+    "dev": "yarn concurrently \"cd server && yarn develop\" \"cd client && yarn dev\"",
+    "repo:upstream": "git fetch upstream && git merge upstream/main"
+  },
+  "dependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "author": "Paul Brats",
+  "license": "MIT"
+}
