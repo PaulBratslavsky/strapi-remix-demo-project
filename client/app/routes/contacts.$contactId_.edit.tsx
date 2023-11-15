@@ -65,14 +65,14 @@ export default function EditContact() {
       </label>
       <label>
         <span>Notes</span>
-        <textarea defaultValue={contact.notes} name="notes" rows={6} />
+        <textarea defaultValue={contact.note} name="note" rows={6} />
       </label>
-      <p>
+      <div className="button-group">
         <button type="submit">Save</button>
         <button type="button" onClick={() => navigate(-1)}>
           Cancel
         </button>
-      </p>
+      </div>
     </Form>
   );
 }

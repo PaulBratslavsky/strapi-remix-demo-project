@@ -28,8 +28,8 @@ body {
   color: #121212;
 }
 textarea,
-input,
-button {
+input {
+  width: 100%;
   font-size: 1rem;
   font-family: inherit;
   border: none;
@@ -40,10 +40,21 @@ button {
   line-height: 1.5;
   margin: 0;
 }
+
 button {
   color: #3992ff;
   font-weight: 500;
+  font-size: 1rem;
+  font-family: inherit;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 0px 1px hsla(0, 0%, 0%, 0.2), 0 1px 2px hsla(0, 0%, 0%, 0.2);
+  background-color: white;
+  line-height: 1.5;
+  margin: 0;
 }
+
 
 textarea:hover,
 input:hover,
@@ -317,7 +328,6 @@ i {
 
 #contact-form {
   display: flex;
-  max-width: 40rem;
   flex-direction: column;
   gap: 1rem;
 }
@@ -394,4 +404,23 @@ i {
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+.button-group {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.create-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
 }

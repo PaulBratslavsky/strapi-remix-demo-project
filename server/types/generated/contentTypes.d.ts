@@ -379,6 +379,7 @@ export interface ApiContactContact extends Schema.CollectionType {
     twitter: Attribute.String;
     favorite: Attribute.Boolean & Attribute.DefaultTo<false>;
     avatar: Attribute.String;
+    note: Attribute.Text;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
